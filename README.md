@@ -1,3 +1,5 @@
-# hello-world
-My first repository you guys!
-I have yet to taste a tasty taco.
+# Simly the spell checker
+This java application lets you
+spell check your text documents,
+as long as they are written in
+English.
