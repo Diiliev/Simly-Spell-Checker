@@ -1,4 +1,3 @@
-// adding a comment
 package SimlySpellChecker;
 
 import java.awt.image.BufferedImage;
