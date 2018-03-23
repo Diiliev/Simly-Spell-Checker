@@ -162,15 +162,15 @@ public class Main extends JFrame implements ActionListener
         skipBtn.setPreferredSize(new Dimension(fWidth-350, 25));
         pSkBtn.add(skipBtn);
 
+        // Thank you Fred Swartz for the tutorial on struts
+        // http://www.fredosaurus.com/notes-java/GUI/layouts/42boxlayout-spacing.html
         // setup the right side of my box layout for pReplace
         pReplaceRight = new JPanel();
         pReplaceRight.setLayout(new BoxLayout(pReplaceRight, BoxLayout.Y_AXIS));
         pReplaceRight.setPreferredSize(new Dimension(fWidth-350, fHeight-350)); // w 150, h 160
         //pReplaceRight.setBackground(Color.BLACK);
         pReplaceRight.add(pRepBtn);
-        //pReplaceRight.add(Box.createVerticalStrut(5));
         pReplaceRight.add(pIgnBtn);
-        //pReplaceRight.add(Box.createVerticalStrut(5));
         pReplaceRight.add(pSkBtn);
         pReplaceRight.add(Box.createVerticalStrut(20));
 
