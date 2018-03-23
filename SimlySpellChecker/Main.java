@@ -534,7 +534,7 @@ public class Main extends JFrame implements ActionListener
         // tempLOT should contain every object from listOT that is NOT typoEx
         for (int i = 0; i < listOfTypos.size(); i++)
         {
-            if (!(listOfTypos.get(i).getTypo().equals(typoEx)))
+            if (!(listOfTypos.get(i).getTypo().equalsIgnoreCase(typoEx)))
             {
                 tempListOfTypos.add(listOfTypos.get(i));
             }
