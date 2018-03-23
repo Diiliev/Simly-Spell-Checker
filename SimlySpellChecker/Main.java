@@ -3,13 +3,13 @@ package SimlySpellChecker;
 import java.awt.image.BufferedImage;
 import java.sql.*;
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.*;
-import java.lang.StringBuilder;
 import java.util.*;
 import java.util.List;
 
@@ -59,17 +59,14 @@ public class Main extends JFrame implements ActionListener
 
     // define of all the components for the current frame
     private CardLayout cl = new CardLayout(); // Thank you Branislav Lazic for the tutorials on Card and BoxLayout
+    private JPanel pScroll = new JPanel();
     private JPanel pCardL = new JPanel();     // https://github.com/BranislavLazic
     private JPanel pBtns = new JPanel();
     private JPanel pLoading = new JPanel();
     private JPanel pReplace = new JPanel();
-    private JPanel pRepReplace, pRepIgnore, pRepSkip, pRepErrors;
     private JPanel pDone = new JPanel();
-    private JTextArea textArea = new JTextArea(23, 5);
-    private JScrollPane scroll = new JScrollPane(textArea); // add the text area to the scroll pane
-    private JRadioButton rBG = new JRadioButton("BG");
-    private JRadioButton rENG = new JRadioButton("ENG");
-    private ButtonGroup btnG = new ButtonGroup();
+    private JTextArea textArea = new JTextArea();
+    private JScrollPane scroll = new JScrollPane(textArea ,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // add the text area to the scroll pane
     private JButton checkBtn = new JButton("Check");
     private JButton replaceBtn = new JButton("Replace");
     private JButton ignoreBtn = new JButton( "Ignore");
@@ -91,33 +88,29 @@ public class Main extends JFrame implements ActionListener
 
     private Main()
     {
+        // initialise frame width and height
+        int fWidth = 500, fHeight = 510;
+
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Container container = this.getContentPane();
 
-        // add listeners
-        rBG.addActionListener(this);
-        rENG.addActionListener(this);
+        // add listener to the check button
         checkBtn.addActionListener(this);
+        checkBtn.setPreferredSize(new Dimension(fWidth-50, fHeight-460)); // w 450 h 50
 
-        // add the radio buttons to the button group
-        btnG.add(rBG);
-        btnG.add(rENG);
-        rENG.setSelected(true);
+        // place the check button in the checking panel i.e pBtns. Adequate name I know.
+        //pBtns.setBackground(Color.BLUE);
+        pBtns.add(checkBtn, BorderLayout.CENTER);
 
         // make the text automatically go to a new line at the crossing word
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
 
-        // set the scroll size and add to top of the frame, num of columns doesn't matter so it's 0
-        //scroll.setPreferredSize(new Dimension(0, 380));
-        container.add(scroll, BorderLayout.PAGE_START);
-
-        // place the components for the checking panel i.e pBtns. Adequate name I know.
-        pBtns.setLayout(new BorderLayout());
-        /*pBtns.add(rBG);
-        pBtns.add(rENG);*/
-        pBtns.add(checkBtn, BorderLayout.PAGE_START);
-
+        // set the scroll size and add to top of the frame
+        scroll.setPreferredSize(new Dimension(fWidth-50, fHeight-160)); // w 450 h 350
+        scroll.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        pScroll.add(scroll);
+        container.add(pScroll, BorderLayout.PAGE_START);
 
         // Thank you: https://alvinalexander.com/blog/post/jfc-swing/use-animated-gif-image-in-jfc-swing-application
         // Gif used under free license from https://icons8.com/preloaders/en/horizontal/glass-lines/
@@ -126,6 +119,9 @@ public class Main extends JFrame implements ActionListener
         ImageIcon loadingGif = new ImageIcon(this.getClass().getResource("loading.gif"));
         loadingLbl.setIcon(loadingGif);
         pLoading.add(loadingLbl);
+
+        JPanel pReplaceLeft, pReplaceRight;
+        JPanel pRepReplace, pRepIgnore, pRepSkip, pRepErrors;
 
         // create the components for the replace panel
         pRepReplace = new JPanel();
@@ -145,16 +141,46 @@ public class Main extends JFrame implements ActionListener
         pRepErrors.setLayout(new FlowLayout(FlowLayout.LEFT));
         pRepErrors.add(numErrLbl);
 
-        // grid align these replace panels in 4 rows of 2 columns 0 hgap 4 vgap
-        pReplace.setLayout(new GridLayout(4,2, 0, 4));
+        // setup the left side of my box layout for pReplace
+        pReplaceLeft = new JPanel();
+        pReplaceLeft.setLayout(new BoxLayout(pReplaceLeft, BoxLayout.Y_AXIS));
+        pReplaceLeft.setPreferredSize(new Dimension(fWidth-200, fHeight-350)); // w 350, h 160
+        //pReplaceLeft.setBackground(Color.BLUE);
+        pReplaceLeft.add(pRepReplace);
+        pReplaceLeft.add(pRepIgnore);
+        pReplaceLeft.add(pRepSkip);
+        pReplaceLeft.add(pRepErrors);
 
-        pReplace.add(pRepReplace);
-        pReplace.add(replaceBtn);
-        pReplace.add(pRepIgnore);
-        pReplace.add(ignoreBtn);
-        pReplace.add(pRepSkip);
-        pReplace.add(skipBtn);
-        pReplace.add(pRepErrors);
+        // make the three buttons equal size. Must be in seperate panels :(
+        JPanel pRepBtn = new JPanel();
+        replaceBtn.setPreferredSize(new Dimension(fWidth-350, 25));
+        pRepBtn.add(replaceBtn);
+        JPanel pIgnBtn = new JPanel();
+        ignoreBtn.setPreferredSize(new Dimension(fWidth-350, 25));
+        pIgnBtn.add(ignoreBtn);
+        JPanel pSkBtn = new JPanel();
+        skipBtn.setPreferredSize(new Dimension(fWidth-350, 25));
+        pSkBtn.add(skipBtn);
+
+        // setup the right side of my box layout for pReplace
+        pReplaceRight = new JPanel();
+        pReplaceRight.setLayout(new BoxLayout(pReplaceRight, BoxLayout.Y_AXIS));
+        pReplaceRight.setPreferredSize(new Dimension(fWidth-350, fHeight-350)); // w 150, h 160
+        //pReplaceRight.setBackground(Color.BLACK);
+        pReplaceRight.add(pRepBtn);
+        //pReplaceRight.add(Box.createVerticalStrut(5));
+        pReplaceRight.add(pIgnBtn);
+        //pReplaceRight.add(Box.createVerticalStrut(5));
+        pReplaceRight.add(pSkBtn);
+        pReplaceRight.add(Box.createVerticalStrut(20));
+
+        // setup pReplace
+        pReplace.setLayout(new BoxLayout(pReplace, BoxLayout.X_AXIS));
+        //pReplace.setBackground(Color.DARK_GRAY);
+        pReplace.add(Box.createHorizontalStrut(13));
+        pReplace.add(pReplaceLeft);
+        pReplace.add(pReplaceRight);
+        pReplace.add(Box.createHorizontalStrut(13));
 
         // Listen to the buttons in pReplace
         replaceBtn.addActionListener(this);
@@ -162,9 +188,12 @@ public class Main extends JFrame implements ActionListener
         skipBtn.addActionListener(this);
 
         // create the components for the done panel
-        pDone.setLayout(new FlowLayout(FlowLayout.LEFT));
+        pDone.setLayout(new BoxLayout(pDone, BoxLayout.X_AXIS));
+        pDone.add(Box.createHorizontalStrut(20));
         pDone.add(doneLbl);
         pDone.add(doneBtn);
+        pDone.add(Box.createHorizontalStrut(20));
+        //pDone.setBackground(Color.BLUE);
 
         doneBtn.addActionListener(this);
 
@@ -174,13 +203,14 @@ public class Main extends JFrame implements ActionListener
         pCardL.add(pLoading, "pLoading");
         pCardL.add(pReplace, "pReplace");
         pCardL.add(pDone, "pDone");
+
         container.add(pCardL, BorderLayout.CENTER);
 
         // on startup show pBtns
         cl.show(pCardL, "pBtns");
 
         // set the size of the frame
-        this.setSize(500,510);
+        this.setSize(fWidth,fHeight);
         this.setResizable(false);
 
         // make the frame centered to the screen
@@ -205,52 +235,45 @@ public class Main extends JFrame implements ActionListener
 
         if (source == checkBtn)
         {
-            if (rBG.isSelected())
-            {
-                JOptionPane.showMessageDialog(this, "BG spell check not yet supported");
-            }
-            else
-            {
-                // show the loading icon
-                cl.show(pCardL, "pLoading");
+            // show the loading icon
+            cl.show(pCardL, "pLoading");
 
-                /*
-                 * checkSpelling() might take an enormous ammount of time, if the text is long
-                 * to combat this I run it in the background using swing worker
-                 * BIG thanks to Albert Attard and his tutorial on the topic:
-                 * https://www.youtube.com/watch?v=qbrE6idMsWU
-                */
-                worker = new SwingWorker<Void, Void>() {
+            /*
+             * checkSpelling() might take an enormous ammount of time, if the text is long
+             * to combat this I run it in the background using swing worker
+             * BIG thanks to Albert Attard and his tutorial on the topic:
+             * https://www.youtube.com/watch?v=qbrE6idMsWU
+            */
+            worker = new SwingWorker<Void, Void>() {
 
-                    // check the spelling
-                    @Override
-                    protected Void doInBackground() {
-                        checkSpelling();
-                        return null;
+                // check the spelling
+                @Override
+                protected Void doInBackground() {
+                    checkSpelling();
+                    return null;
+                }
+
+                // When spell check is complete
+                @Override
+                protected void done() {
+
+                    // if there are no typos show Done panel
+                    if (listOfTypos.size() == 0)
+                    {
+                        highlight.removeAllHighlights();
+                        cl.show(pCardL, "pDone");
                     }
+                    else
+                    {
+                        // else show the interface for replacing typos
+                        cl.show(pCardL,"pReplace");
 
-                    // When spell check is complete
-                    @Override
-                    protected void done() {
-
-                        // if there are no typos show Done panel
-                        if (listOfTypos.size() == 0)
-                        {
-                            highlight.removeAllHighlights();
-                            cl.show(pCardL, "pDone");
-                        }
-                        else
-                        {
-                            // else show the interface for replacing typos
-                            cl.show(pCardL,"pReplace");
-
-                            // refresh the labels and highlight the first typo in listOfTypos
-                            refreshHighlightAndFocus();
-                        }
+                        // refresh the labels and highlight the first typo in listOfTypos
+                        refreshHighlightAndFocus();
                     }
-                };
-                worker.execute();
-            }
+                }
+            };
+            worker.execute();
         }
 
         else if (source == replaceBtn)
@@ -552,19 +575,19 @@ public class Main extends JFrame implements ActionListener
         // The row for Replace can only show a word up to 18 pixels - 3 for the period = 15 px
         // The rows for ignore and skip can take a word up to 120 pixels - 3 for the period = 127 px
         // if the typo is longer than 15px but shorter than 117, shorten it only for the replace row
-        if (fm.stringWidth(typo.getTypo()) > 18 && fm.stringWidth(typo.getTypo()) <= 120)
+        if (fm.stringWidth(typo.getTypo()) > 60 && fm.stringWidth(typo.getTypo()) <= 180)
         {
-            for (int i = 1; fm.stringWidth(typo.getTypo().substring(0, i)) < 15; i++)
+            for (int i = 1; fm.stringWidth(typo.getTypo().substring(0, i)) < 57; i++)
             {
                 shortestWord = typo.getTypo().substring(0, i) + ".";
             }
         }
         // if the typo is longer than 117px, shorten it for the replace row AND the other 2 rows
-        else if (fm.stringWidth(typo.getTypo()) > 120)
+        else if (fm.stringWidth(typo.getTypo()) > 180)
         {
-            for (int i = 1; fm.stringWidth(typo.getTypo().substring(0, i)) < 117; i++)
+            for (int i = 1; fm.stringWidth(typo.getTypo().substring(0, i)) < 177; i++)
             {
-                if (fm.stringWidth(typo.getTypo().substring(0, i)) < 15)
+                if (fm.stringWidth(typo.getTypo().substring(0, i)) < 57)
                 {
                     shortestWord = typo.getTypo().substring(0, i) + ".";
                 }
@@ -576,7 +599,7 @@ public class Main extends JFrame implements ActionListener
         // set the labels to the current typo information
         replaceLbl.setText("Replace \" " + shortestWord + " \" with: ");
         ignoreLbl.setText("Always ignore \" " + shortWord + " \"");
-        skipLbl.setText("Ignore \" " + shortWord + " \" only once");
+        skipLbl.setText("Skip \" " + shortWord + " \" only once");
         numErrLbl.setText(listOfTypos.size() + " Errors");
 
         // highlight typo
